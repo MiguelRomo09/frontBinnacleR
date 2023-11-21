@@ -1,17 +1,16 @@
-// import React from 'react'
-
 import { useEffect } from "react";
-import { useTasks } from "../context/TasksContext"
+// import { useTasks } from "../context/TasksContext"
+import { useRecords } from "../context/RecordsContext"
 import { Link } from "react-router-dom";
 
-function TasksPage() {
-  const { getTasks,tasks, deleteTask } = useTasks();
+function RecordsPage() {
+  const { getRecords,records, deleteRecord } = useRecords();
 
   useEffect(() =>{
-    getTasks()
+    getRecords()
   },[]);
 
-  if(tasks.length == 0) return (<h1>No tasks</h1>);
+  if(records.length == 0) return (<h1>No Records</h1>);
 
   return (
     <>
@@ -31,29 +30,29 @@ function TasksPage() {
                                     <tr>
                                       <th scope="col">#</th>
                                       <th scope="col">Title</th>
-                                      <th scope="col">Description</th>
+                                      <th scope="col">Content</th>
                                       <th scope="col">Date</th>
                                       <th scope="col"></th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {tasks.map((task,index) => (
-                                      // <div key={taks._id}>
+                                    {records.map((record,index) => (
+                                      // <div key={taks.id}>
                                       //   <h1>{taks.title}</h1>
-                                      //   <p>{taks.description}</p>
+                                      //   <p>{taks.content}</p>
                                       // </div>
-                                      <tr key={task._id}>
+                                      <tr key={record.id}>
                                         <th scope="row">{index+1}</th>
-                                        <td>{task.title}</td>
-                                        <td>{task.description}</td>
-                                        <td>{new Date(task.date).toLocaleDateString()}</td>
+                                        <td>{record.title}</td>
+                                        <td>{record.content}</td>
+                                        <td>{new Date(record.date).toLocaleDateString()}</td>
                                         <td className="text-center">
                                           <div className="btn-group" role="group">
                                           <button type="button" className="btn btn-danger"
                                             onClick={() => {
-                                              deleteTask(task._id);
+                                              deleteRecord(record.id);
                                             }}>Delete</button>
-                                          <Link to={`/tasks/${task._id}`} type="button" className="btn btn-warning">Edit</Link>
+                                          <Link to={`/records/${record.id}`} type="button" className="btn btn-warning">Edit</Link>
                                         </div>
                                         </td>
                                       </tr>
@@ -74,4 +73,4 @@ function TasksPage() {
   );
 }
 
-export default TasksPage
+export default RecordsPage

@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) =>{
     };
 
     const logout = () => {
-        Cookies.remove("token");
+        Cookies.remove("token_binnacle");
         setIsAuthenticated(false);
         setUser(null);
     }
@@ -62,15 +62,15 @@ export const AuthProvider = ({ children }) =>{
     useEffect(()=>{
         async function checkLogin(){            
             const cookies = Cookies.get();
-            if(!cookies.token){
+            if(!cookies.token_binnacle){
                 setIsAuthenticated(false);
                 setUser(null);
                 setLoading(false);
                 return;
             }
-            if(cookies.token){
+            if(cookies.token_binnacle){
                 try{
-                    const res = await verifyTokenRequest(cookies.token);
+                    const res = await verifyTokenRequest(cookies.token_binnacle);
                     if(!res.data){
                         setLoading(false);
                         setIsAuthenticated(false);

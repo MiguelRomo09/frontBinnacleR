@@ -1,31 +1,32 @@
-import {useForm} from 'react-hook-form'
-import { useTasks } from '../context/TasksContext';
+import { useForm } from 'react-hook-form'
+// import { useTasks } from '../context/TasksContext';
+import { useRecords } from '../context/RecordsContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 
-function TaskForm() {
+function RecordForm() {
   const {register, handleSubmit, setValue } = useForm();
-  const {createTask, getTask, updateTask} = useTasks();
+  const {createRecord, getRecord, updateRecord} = useRecords();
   const navigate = useNavigate();
   const params = useParams();
 
 
   useEffect(() => {
-    async function loadTask(){ 
+    async function loadRecord(){ 
         if(params.id){
-            const task = await getTask(params.id);
-            setValue('title',task.title);
-            setValue('description', task.description);
+            const record = await getRecord(params.id);
+            setValue('title',record.title);
+            setValue('content', record.content);
         }   
     }
-    loadTask();
+    loadRecord();
   },[]);
 
   const onSubmit = handleSubmit((data) => {
     if(params.id){
-        updateTask(params.id, data);
+        updateRecord(params.id, data);
     }else{
-        createTask(data);
+        createRecord(data);
     }
     navigate('/tasks');
   });
@@ -72,11 +73,11 @@ function TaskForm() {
                                             <textarea
                                             rows="10"
                                             className="form-control"
-                                            id="inputDescription"
+                                            id="inputContent"
                                             type="text"
-                                            {...register('description', { required: true })}
+                                            {...register('content', { required: true })}
                                             ></textarea>
-                                            <label htmlFor="inputDescription">Description</label>
+                                            <label htmlFor="inputContent">Content</label>
                                         </div>
                                         <div className="form-floating mb-3">
                                             <input
@@ -120,4 +121,4 @@ function TaskForm() {
   )
 }
 
-export default TaskForm
+export default RecordForm
