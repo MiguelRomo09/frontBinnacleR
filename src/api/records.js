@@ -10,3 +10,5 @@ export const createRecordRequest = (task) =>axios.post('/records', task);
 export const updateRecordRequest = (id, task) => axios.put(`/records/${id}`, task);
 
 export const deleteRecordRequest = (id) => axios.delete(`/records/${id}`);
+
+export const getRecordsDateRequest = (from,to) => axios.get(`/records/date/${from}/${to}`);

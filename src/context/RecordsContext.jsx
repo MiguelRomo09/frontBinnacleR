@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { createRecordRequest, getRecordsRequest, deleteRecordRequest, getRecordRequest, updateRecordRequest } from "../api/records";
+import { createRecordRequest, getRecordsRequest, deleteRecordRequest, getRecordRequest, updateRecordRequest,getRecordsDateRequest } from "../api/records";
 
 const RecordContext = createContext();
 
@@ -64,6 +64,34 @@ export function RecordProvider({ children }){
         }
     };
 
+    
+    const filterRecord = async (filter) => {
+        try{
+            var newData;
+            if(filter != ''){
+                newData = records.filter(row => {return row.title.toLowerCase().includes(filter.toLowerCase())});
+                console.log(newData);            
+                setRecords(newData);    
+            }else{
+                getRecords();
+            }
+            
+        }catch(error){
+            console.log(error);
+        }
+    };
+
+    const filterRecordsDate = async (from,to) => {
+        try{
+            const res = await getRecordsDateRequest(from,to);
+            console.log(res);
+            setRecords(res.data);
+            
+        }catch(error){
+            console.log(error);
+        }
+    }
+
 
     return(
         <RecordContext.Provider value={{
@@ -73,6 +101,8 @@ export function RecordProvider({ children }){
             deleteRecord,
             getRecord,
             updateRecord,
+            filterRecord,
+            filterRecordsDate,
           }}>
             { children }
         </RecordContext.Provider>

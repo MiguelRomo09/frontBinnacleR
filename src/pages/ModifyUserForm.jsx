@@ -1,35 +1,74 @@
-import { useForm } from 'react-hook-form'
-import { useAuth } from '../context/AuthContext'
-import { useUsers } from '../context/UsersContext'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { useAuth } from '../context/AuthContext';
+import { useUsers } from '../context/UsersContext';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-function RegisterPage() {
+function ModifyUserForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    watch, 
+    setValue,
     formState: { errors },
   } = useForm()
-  const { signUp, isAuthenticated, errors: AuthErrors } = useAuth();
-  const { checkUserExist } = useUsers();
+  const { isAuthenticated, errors: AuthErrors } = useAuth();
+  const { getUser,updateUser,checkUserExist } = useUsers();
 
   const navigate = useNavigate()
 
+  const params = useParams();
+
+
+  const [name, setInputName] = useState('');
+  const [surname, setInputSurname] = useState('');
+  const [user, setInputUser] = useState('');
+  const [suspend, setInputSuspend] = useState(false);
+  const [userType, setInputUserType] = useState(false);
+
   useEffect(() => {
-    if (isAuthenticated) navigate('/records')
+    async function loadRecord(){ 
+        if(params.id){
+            const findUser = await getUser(params.id);
+            setValue('name',findUser[0].name);
+            setValue('surname', findUser[0].surname);
+            setValue('user', findUser[0].user);
+            if(findUser[0].status == 2){              
+              setValue('suspend', true);
+              setInputSuspend(true);
+            }else{           
+              setValue('suspend', false);
+              setInputSuspend(false);
+            }
+            if(findUser[0].userType == 1){              
+              setValue('userType', true);
+              setInputUserType(true);
+            }else{           
+              setValue('userType', false);
+              setInputUserType(false);
+            }
+
+            setInputName(findUser[0].name);
+            setInputSurname(findUser[0].surname);
+            setInputUser(findUser[0].user);
+        }   
+    }
+    loadRecord();
+  },[]);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigate('/records')
   }, [isAuthenticated])
 
   const onSubmit = handleSubmit(async (values) => {
     if(values.user == ''){
-      values.user = (values.name.substring(0, 3) +'-'+ values.surname.substring(0, 3)).toLowerCase()
+      values.user = (values.name.substring(0, 3) +'-'+ values.surname.substring(0, 3)).toLowerCase();
     }
-    signUp(values)
+    updateUser(params.id,values);
+    navigate('/admin-users')
+    
   })
   
-  const [name, setInputName] = useState('');
-  const [surname, setInputSurname] = useState('');
-  const [user, setInputUser] = useState('');
 
   // Función para manejar cambios en campo1
   const handleInputNameChange = (event) => {
@@ -46,13 +85,14 @@ function RegisterPage() {
     updateInputUser(name, value);
   };
 
-  // Función para actualizar el resultado
-  const updateInputUser = async (valueName, valueSurname) => {
-    var userAux = (valueName.substring(0, 3) +'-'+ valueSurname.substring(0, 3)).toLowerCase(); 
-    var checkUser = await checkUserExist(userAux);
-    console.log(checkUser);
-      setInputUser(checkUser.data);
-  };
+
+    // Función para actualizar el resultado
+    const updateInputUser = async (valueName, valueSurname) => {
+      var userAux = (valueName.substring(0, 3) +'-'+ valueSurname.substring(0, 3)).toLowerCase(); 
+      var checkUser = await checkUserExist(userAux);
+      console.log(checkUser);
+        setInputUser(checkUser.data);
+    };
 
   const password = watch('psw'); // Obtén el valor del campo de contraseña
   // const confirmPassword = watch('confirmPassword'); // Obtén el valor del campo de confirmación de contraseña
@@ -68,7 +108,7 @@ function RegisterPage() {
                 <div className="card shadow-lg border-0 rounded-lg mt-5">
                   <div className="card-header">
                     <h3 className="text-center font-weight-light my-4">
-                      Registro
+                      Modificar usuario
                     </h3>
                   </div>
                   <div className="card-body">
@@ -115,7 +155,6 @@ function RegisterPage() {
                               autoComplete="off"
                               onChange={handleInputNameChange}
                             />
-                            {/* <input className="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" /> */}
                             <label htmlFor="name">Nombre(s)</label>
                           </div>
                         </div>
@@ -130,7 +169,6 @@ function RegisterPage() {
                               autoComplete="off"
                               onChange={handleInputSurnameChange}
                             />
-                            {/* <input className="form-control" id="inputLastName" type="text" placeholder="Enter your last name" /> */}
                             <label htmlFor="surname">Apellidos</label>
                           </div>
                         </div>
@@ -139,13 +177,12 @@ function RegisterPage() {
                         <div className="col-md-6">
                           <div className="form-floating mb-3 mb-md-0">
                             <input
-                              {...register('psw', { required: true })}
+                              {...register('psw')}
                               className="form-control"
                               id="psw"
                               autoComplete="off"
                               type="password"
                             />
-                            {/* <input className="form-control" id="psw" type="password" placeholder="Create a password" /> */}
                             <label htmlFor="psw">Contraseña</label>
                           </div>
                         </div>
@@ -161,11 +198,11 @@ function RegisterPage() {
                               autoComplete="off"
                               type="password"
                             />
-                            {/* <input className="form-control" id="psw" type="password" placeholder="Create a password" /> */}
                             <label htmlFor="pswConfirm">Confirmar contraseña</label>
                           </div>
                         </div>
                         
+                        <span style={{'color' : '#8F949B','font-size' : '12px'}}>*Si no se quiere modificar la contraseña, deje en blanco los espacios</span>
                       </div>
                       <div className="row mb-3">
                         <div className="col-md-6">
@@ -179,10 +216,21 @@ function RegisterPage() {
                               value={user}
                               
                             />
-                            {/* <input className="form-control" id="psw" type="password" placeholder="Create a password" /> */}
                             <label htmlFor="user">Usuario</label>
                           </div>
                           <span style={{'color' : '#8F949B','font-size' : '12px'}}>*El usuario se genera automaticamente, no se puede editar</span>
+                        </div>
+                        <div className='col-md-6'>
+                          <ul className="list-group list-group-horizontal">
+                            <li className="list-group-item col-md-6">
+                              <input className="form-check-input me-1" type="checkbox" value={suspend}  id="suspend" {...register('suspend')}/>
+                              <label className="form-check-label" htmlFor="suspend">Suspender</label>
+                            </li>
+                            <li className="list-group-item col-md-6">
+                              <input className="form-check-input me-1" type="checkbox" value={userType} id="userType" {...register('userType')} />
+                              <label className="form-check-label" htmlFor="userType">Administrador</label>
+                            </li>
+                          </ul>
                         </div>
                       </div>
                       <div className="mt-4 mb-0">
@@ -191,16 +239,11 @@ function RegisterPage() {
                             className="btn btn-primary btn-block"
                             type="submit"
                           >
-                            Registrarse
+                            Guardar cambios
                           </button>
                         </div>
                       </div>
                     </form>
-                  </div>
-                  <div className="card-footer text-center py-3">
-                    <div className="small">                      
-                      <Link to="/login">¿Ya estas registrado? Inicia sesión</Link>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -208,27 +251,11 @@ function RegisterPage() {
           </div>
         </main>
       </div>
-      <div id="layoutAuthentication_footer">
-        <footer className="py-4 bg-light mt-auto">
-          <div className="container-fluid px-4">
-            <div className="d-flex align-items-center justify-content-between small">
-              <div className="text-muted">
-                Copyright &copy; Your Website 2023
-              </div>
-              <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
     </div>
   )
 }
 
 
-export default RegisterPage
+export default ModifyUserForm
 
  
